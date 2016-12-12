@@ -1,0 +1,37 @@
+enum GraphType { adjacency_list }; //adjacency_list == VertexT has a method VPtrContainer children()
+template <class VertexT, int ops, GraphType type>
+CreateVertexType {
+	struct SystemPrivateVertexT : public VertexT {
+		union {
+		    int wasHereCount;
+		} vertexSpecificData;
+
+		const GraphType graphType = type;
+	}
+
+	using type = PrivateVertexT;
+}
+
+template <class SystemPrivateVertexT>
+Result someGraphOperation(SystemPrivateVertexT& head);
+
+
+
+example:
+struct UserVertex {
+	std::vector<UserVertex*> children() { //used by library
+		return children_;
+	}
+
+	std::vector<UserVertex*> children_;
+}
+
+using Vertex = typename CreateVertexType<UserVertex, OP1 | OP2, adjacency_list>::type;
+Vertex head;
+Vertex children;
+
+head.children_.push_back(&children);
+
+graphOperation1(head);
+graphOperation2(head);
+
