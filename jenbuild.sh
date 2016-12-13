@@ -15,3 +15,6 @@ genhtml -o lcov_html app.info
 
 cd ../doc
 doxygen ./Doxyfile
+
+cd ..
+cppcheck --enable=all --inconclusive --xml --xml-version=2 --suppress=missingIncludeSystem -Iinclude/ src/ test/*.cpp 2> build/cppcheck.xml
