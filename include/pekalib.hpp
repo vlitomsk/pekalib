@@ -4,6 +4,6 @@
 #include <Search.hpp>
 
 
-namespace pecalib {
+namespace pekalib {
 
 }

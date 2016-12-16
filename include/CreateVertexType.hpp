@@ -1,6 +1,6 @@
 #pragma once
 
-namespace pecalib {
+namespace pekalib {
 
     enum GraphType {
         adjacency_list
