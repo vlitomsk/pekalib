@@ -6,8 +6,8 @@ struct TestVertex {
         return children_;
     }
 
-    TestVertex() {}
-    TestVertex(int d) : data(d) {}
+    TestVertex() : data(9999999) {}
+    explicit TestVertex(int d) : data(d) {}
 
     int data;
 
