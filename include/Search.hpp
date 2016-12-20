@@ -53,18 +53,22 @@ namespace pekalib {
         template <typename DSType, bool reverso, typename VertexT, typename F>
         static void depthBreadthSearch(VertexT *head, const F &callback) {
             DSType dstruc;
+            const int hereCountStart = head->vertexSpecificData.wasHereCount;
+
             dstruc.push(head);
-            std::unordered_set<const VertexT *> used;
+            head->vertexSpecificData.wasHereCount = hereCountStart + 1;
             while (!dstruc.empty()) {
                 VertexT *processed = get_top(dstruc);
                 dstruc.pop();
+
                 callback(processed);
-                used.insert(processed);
+
                 const size_t N = processed->children().size();
                 for (int i = (reverso ? N-1 : 0) ; i != (reverso ? -1 : N) ; i += (reverso ? -1 : 1)) {
                     VertexT *neigh = (VertexT *) (processed->children()[i]);
-                    if (!used.count(neigh)) {
+                    if (neigh->vertexSpecificData.wasHereCount == hereCountStart) {
                         dstruc.push(neigh);
+                        neigh->vertexSpecificData.wasHereCount = hereCountStart + 1;
                     }
                 }
             }

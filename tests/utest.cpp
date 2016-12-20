@@ -1,4 +1,5 @@
 #include <gtest/gtest.h>
+#include <CreateVertexType.hpp>
 #include "pekalib.hpp"
 
 struct TestVertex {
@@ -22,14 +23,21 @@ TEST(Search, depthFirstSearch) {
     ActualVertex child00;
     ActualVertex child1;
 
-    head.children() = { &child0, &child1 };
-    child0.children() = { &child00 };
-    child00.children() = { &head };
+    /*ASSERT_EQ(head.vertexSpecificData.wasHereCount, 0);
+    ASSERT_EQ(child0.vertexSpecificData.wasHereCount, 0);
+    ASSERT_EQ(child00.vertexSpecificData.wasHereCount, 0);
+    ASSERT_EQ(child00.vertexSpecificData.wasHereCount, 0);*/
 
+    head.children() = {&child0, &child1};
+    child0.children() = {&child00};
+    child00.children() = {&head};
+
+    for (int j = 0; j < 1000000; j++) {
     int i = 0;
-    pekalib::Search::depthFirstSearch(&head, [&](ActualVertex* v) {
+    pekalib::Search::depthFirstSearch(&head, [&](ActualVertex *v) {
         v->data = magic[i++];
     });
+}
 
     ASSERT_EQ(head.data, magic[0]);
     ASSERT_EQ(child0.data, magic[1]);
