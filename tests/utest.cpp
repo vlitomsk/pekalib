@@ -6,10 +6,10 @@ struct TestVertex {
         return children_;
     }
 
-    TestVertex() : data(9999999) {}
+    TestVertex() {}
     explicit TestVertex(int d) : data(d) {}
 
-    int data;
+    int data = 0;
 
     std::vector<TestVertex*> children_;
 };
