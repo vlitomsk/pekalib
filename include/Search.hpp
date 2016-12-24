@@ -6,9 +6,9 @@
 #include <unordered_set>
 #include <stack>
 
-/*! \addtogroup pekalib.Search Search
-    @{
-*/
+/** @defgroup Search module
+ *  @{
+ */
 
 const int searchOp = 0x0010;
 namespace pekalib {
@@ -167,4 +167,4 @@ namespace pekalib {
 }
 
 
-/*! @} */
+/** @} */
