@@ -19,7 +19,7 @@ namespace pekalib {
      * @tparam type a graph scheme (used for safe optimizations)
      */
     template<class VertexT, int ops, GraphType type>
-    class   {
+    class CreateVertexType {
     public:
         struct SystemPrivateVertexT : public VertexT {
             using VertexT::VertexT;

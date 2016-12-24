@@ -95,7 +95,6 @@ TEST(Search, Dijkstra) {
     child00.data = 4323;
     child1.data = 32;
 
-    int i = 0;
     pekalib::Search::Dijkstra(&head, [](ActualVertex *v) {
         return *(std::vector<ActualVertex*>*)(&v->children);
     }, [&](const ActualVertex* v) {
