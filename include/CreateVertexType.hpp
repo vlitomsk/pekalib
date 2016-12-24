@@ -1,14 +1,25 @@
 #pragma once
 
+
+/*! \addtogroup pekalib.Core Core
+    @{
+*/
 namespace pekalib {
 
     enum GraphType {
-        adjacency_list
-    }; //adjacency_list == VertexT has a method VPtrContainer children()
+        adjacency_list  ///< VertexT has a children list
+    };
 
 
+    /**
+     * @brief Allows to define pekalib vertex type
+     * @details pekalib vertex type neaded by pekalib graph operations
+     * @tparam VertexT user vertex type
+     * @tparam ops used operations mask (used for unsafe optimizations)
+     * @tparam type a graph scheme (used for safe optimizations)
+     */
     template<class VertexT, int ops, GraphType type>
-    class CreateVertexType {
+    class   {
     public:
         struct SystemPrivateVertexT : public VertexT {
             using VertexT::VertexT;
@@ -20,7 +31,11 @@ namespace pekalib {
             const GraphType graphType = type;
         };
 
+        /// Result type
         using ActualVertexT = SystemPrivateVertexT;
     };
 
 }
+
+
+/*! @} */
