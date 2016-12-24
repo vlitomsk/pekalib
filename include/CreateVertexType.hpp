@@ -1,9 +1,9 @@
 #pragma once
 
 
-/*! \addtogroup pekalib.Core Core
-    @{
-*/
+/** @defgroup Search module
+ *  @{
+ */
 namespace pekalib {
 
     enum GraphType {
@@ -38,4 +38,4 @@ namespace pekalib {
 }
 
 
-/*! @} */
+/** @} */
