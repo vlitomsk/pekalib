@@ -1,9 +1,10 @@
 #pragma once
 
 
-/** @defgroup Search module
+/** @defgroup Core module
  *  @{
  */
+
 namespace pekalib {
 
     enum GraphType {
@@ -12,8 +13,8 @@ namespace pekalib {
 
 
     /**
-     * @brief Allows to define pekalib vertex type
-     * @details pekalib vertex type neaded by pekalib graph operations
+     * @brief CreateVertexType Allows to define a pekalib vertex type
+     * @details a pekalib vertex type neaded by pekalib graph operations
      * @tparam VertexT user vertex type
      * @tparam ops used operations mask (used for unsafe optimizations)
      * @tparam type a graph scheme (used for safe optimizations)
