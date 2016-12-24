@@ -9,7 +9,7 @@
 const int searchOp = 0x0010;
 namespace pekalib {
     /**
-     * @brief Search Class which implements basic search algorithms (BFS,DFS) in pekalib.
+     * @brief Search Class which implements basic search algorithms (BFS, DFS) in pekalib.
      */
     class Search {
 
@@ -20,7 +20,7 @@ namespace pekalib {
          */
         template <typename T>
         static T get_top(const T &);
-        
+
         /**
          * @brief get_top template specialization for std::stack
          * @param st stack to get "out" item from.
@@ -50,7 +50,7 @@ namespace pekalib {
          * @param head "seed" vertex of search.
          * @param callback callback called with vertex when it's being marked as visited.
          */
-        template <typename DSType, bool reverso, typename VertexT, typename F>
+        template <class DSType, bool reverso, class VertexT, typename F>
         static void depthBreadthSearch(VertexT *head, const F &callback) {
             DSType dstruc;
             const int hereCountStart = head->vertexSpecificData.wasHereCount;
@@ -106,6 +106,48 @@ namespace pekalib {
         template <class VertexT, typename F>
         static void breadthFirstSearch(VertexT *head, const F &callback) {
             depthBreadthSearch<std::queue<VertexT *>, false, VertexT, F>(head, callback);
+        }
+
+        /**
+         * @brief Dijkstra implementation.
+         * @tparam VertexT vertex type in graph.
+         * @tparam GetD getting the vertex dist callback type.
+         * @tparam SetD setting the vertex dist callback type.
+         * @tparam GetL getting the edge weight callback type.
+         * @param head "seed" vertex of search.
+         * @param setd getting the vertex dist callback.
+         * @param getd setting the vertex dist callback.
+         * @param getl getting the edge weight.
+         */
+        template <class VertexT, typename GetD, typename SetD, typename GetL>
+        static void Dijkstra(VertexT* head, const GetD& getd, const SetD& setd, const GetL& getl) {
+            breadthFirstSearch(head, [&](VertexT* v) {
+                setd(v, INT32_MAX);
+            });
+            setd(head, 0);
+
+            auto compare = [&](const VertexT* a, const VertexT* b) {
+                return getd(a) > getd(b);
+            };
+            std::priority_queue<VertexT*, std::vector<VertexT*>, decltype(compare)>  vertexesPQueue(compare);
+            vertexesPQueue.push(head);
+
+            while (!vertexesPQueue.empty()) {
+                VertexT *vertex = vertexesPQueue.top();
+                vertexesPQueue.pop();
+
+                for (auto neigh_ : vertex->children()) {
+                    VertexT* neigh = (VertexT*) neigh_;
+                    auto length = getl(vertex, neigh);
+
+                    //  If there is shorted path to v through u.
+                    if (getd(neigh) > getd(vertex) + length) {
+                        // Updating the distance of v
+                        setd(neigh, getd(vertex) + length);
+                        vertexesPQueue.push(neigh);
+                    }
+                }
+            }
         }
     };
 }
