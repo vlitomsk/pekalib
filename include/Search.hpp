@@ -6,7 +6,7 @@
 #include <unordered_set>
 #include <stack>
 
-/** @defgroup Search module
+/** @defgroup m1 Search module
  *  @{
  */
 

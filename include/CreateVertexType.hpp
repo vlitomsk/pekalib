@@ -1,7 +1,7 @@
 #pragma once
 
 
-/** @defgroup Core module
+/** @defgroup m0 Core module
  *  @{
  */
 
