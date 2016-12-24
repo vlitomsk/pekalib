@@ -3,16 +3,13 @@
 #include "pekalib.hpp"
 
 struct TestVertex {
-    std::vector<TestVertex*>& children() { //used by library
-        return children_;
-    }
 
     TestVertex() {}
     explicit TestVertex(int d) : data(d) {}
 
     int data = 0;
 
-    std::vector<TestVertex*> children_;
+    std::vector<TestVertex*> children;
 };
 
 TEST(Search, depthFirstSearch) {
@@ -28,13 +25,15 @@ TEST(Search, depthFirstSearch) {
     ASSERT_EQ(child00.vertexSpecificData.wasHereCount, 0);
     ASSERT_EQ(child00.vertexSpecificData.wasHereCount, 0);*/
 
-    head.children() = {&child0, &child1};
-    child0.children() = {&child00};
-    child00.children() = {&head};
+    head.children = {&child0, &child1};
+    child0.children = {&child00};
+    child00.children = {&head};
 
     for (int j = 0; j < 1000000; j++) {
     int i = 0;
-    pekalib::Search::depthFirstSearch(&head, [&](ActualVertex *v) {
+    pekalib::Search::depthFirstSearch(&head, [](ActualVertex *v) {
+        return *(std::vector<ActualVertex*>*)(&v->children);
+    }, [&](ActualVertex *v) {
         v->data = magic[i++];
     });
 }
@@ -53,12 +52,14 @@ TEST(Search, breadthFirstSearch) {
     ActualVertex child00;
     ActualVertex child1;
 
-    head.children() = { &child0, &child1 };
-    child0.children() = { &child00 };
-    child00.children() = { &head };
+    head.children = { &child0, &child1 };
+    child0.children = { &child00 };
+    child00.children = { &head };
 
     int i = 0;
-    pekalib::Search::breadthFirstSearch(&head, [&](ActualVertex* v) {
+    pekalib::Search::breadthFirstSearch(&head, [](ActualVertex *v) {
+        return *(std::vector<ActualVertex*>*)(&v->children);
+    }, [&](ActualVertex *v) {
         v->data = magic[i++];
     });
 
@@ -69,17 +70,13 @@ TEST(Search, breadthFirstSearch) {
 }
 
 struct TestDijkstraVertex {
-    std::vector<TestDijkstraVertex*>& children() { //used by library
-        return children_;
-    }
-
     TestDijkstraVertex() {}
     explicit TestDijkstraVertex(int d) : data(d) {}
 
     int data = 0;
     int computedData = 0;
 
-    std::vector<TestDijkstraVertex*> children_;
+    std::vector<TestDijkstraVertex*> children;
 };
 
 TEST(Search, Dijkstra) {
@@ -89,9 +86,9 @@ TEST(Search, Dijkstra) {
     ActualVertex child00;
     ActualVertex child1;
 
-    head.children() = { &child0, &child1 };
-    child0.children() = { &child00 };
-    child00.children() = { &head };
+    head.children = { &child0, &child1 };
+    child0.children = { &child00 };
+    child00.children = { &head };
 
     head.data = 323;
     child0.data = 954;
@@ -99,7 +96,9 @@ TEST(Search, Dijkstra) {
     child1.data = 32;
 
     int i = 0;
-    pekalib::Search::Dijkstra(&head, [&](const ActualVertex* v) {
+    pekalib::Search::Dijkstra(&head, [](ActualVertex *v) {
+        return *(std::vector<ActualVertex*>*)(&v->children);
+    }, [&](const ActualVertex* v) {
         return v->computedData;
     }, [&](ActualVertex* v, int cData) {
         v->computedData = cData;

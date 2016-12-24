@@ -9,9 +9,92 @@
 const int searchOp = 0x0010;
 namespace pekalib {
     /**
-     * @brief Search Class which implements basic search algorithms (BFS, DFS) in pekalib.
+     * @brief Search Class which implements basic search algorithms (BFS, DFS, Dijkstra) in pekalib.
      */
     class Search {
+
+    public:
+        /**
+          * @brief constant used for type-construction. Means DFS operation.
+          */
+        static const int depthFirstSearchOp = searchOp | 0x1;
+        /**
+          * @brief constant used for type-construction. Means BFS operation.
+          */
+        static const int breadthFirstSearchOp = searchOp | 0x2;
+
+        /**
+         * @brief DFS implementation.
+         * @tparam VertexT vertex type in graph.
+         * @tparam EF getting elements callback type.
+         * @tparam F callback type.
+         * @param head "seed" vertex of search.
+         * @param getting elements callback.
+         * @param callback callback called with vertex when it's being marked as visited.
+         */
+        template <class VertexPtrT, typename EF, typename F>
+        static void depthFirstSearch(VertexPtrT head, const EF& children, const F& callback) {
+            depthBreadthSearch<std::stack<VertexPtrT>, true, VertexPtrT, EF, F>(head, children, callback);
+        }
+
+        /**
+         * @brief BFS implementation.
+         * @tparam VertexT vertex type in graph.
+         * @tparam F callback type.
+         * @param head "seed" vertex of search.
+         * @param getting elements callback.
+         * @param callback callback called with vertex when it's being marked as visited.
+         */
+        template <class VertexPtrT, typename EF, typename F>
+        static void breadthFirstSearch(VertexPtrT head, const EF& children, const F& callback) {
+            depthBreadthSearch<std::queue<VertexPtrT>, false, VertexPtrT, EF, F>(head, children, callback);
+        }
+
+        /**
+         * @brief Dijkstra implementation.
+         * @tparam VertexT vertex type in graph.
+         * @tparam EF getting elements callback type.
+         * @tparam GetD getting the vertex dist callback type.
+         * @tparam SetD setting the vertex dist callback type.
+         * @tparam GetL getting the edge weight callback type.
+         * @param head "seed" vertex of search.
+         * @param getting elements callback.
+         * @param setd getting the vertex dist callback.
+         * @param getd setting the vertex dist callback.
+         * @param getl getting the edge weight.
+         */
+        template <class VertexPtrT, typename EF, typename GetD, typename SetD, typename GetL>
+        static void Dijkstra(VertexPtrT head, const EF& children, const GetD& getd, const SetD& setd, const GetL& getl) {
+            breadthFirstSearch(head, children, [&](VertexPtrT v) {
+                setd(v, INT32_MAX);
+            });
+            setd(head, 0);
+
+            auto compare = [&](const VertexPtrT a, const VertexPtrT b) {
+                return getd(a) > getd(b);
+            };
+            std::priority_queue<VertexPtrT, std::vector<VertexPtrT>, decltype(compare)>  vertexesPQueue(compare);
+            vertexesPQueue.push(head);
+
+            while (!vertexesPQueue.empty()) {
+                VertexPtrT vertex = vertexesPQueue.top();
+                vertexesPQueue.pop();
+
+                auto childs = children(vertex);
+                for (auto neigh : childs) {
+                    auto length = getl(vertex, neigh);
+
+                    //  If there is shorted path to v through u.
+                    if (getd(neigh) > getd(vertex) + length) {
+                        // Updating the distance of v
+                        setd(neigh, getd(vertex) + length);
+                        vertexesPQueue.push(neigh);
+                    }
+                }
+            }
+        }
+
+    private:
 
         /**
          * @brief get_top its common interface for getting "out" item from both std::stack, std::queue.
@@ -46,105 +129,32 @@ namespace pekalib {
          * @tparam DSType datastructure to store not-visited childrens of currently processed vertex.
          * @tparam reverso iff true, traverse childrens' vector from back to front.
          * @tparam VertexT vertex type in graph.
+         * @tparam EF getting elements callback type.
          * @tparam F callback type.
          * @param head "seed" vertex of search.
+         * @param getting elements callback.
          * @param callback callback called with vertex when it's being marked as visited.
          */
-        template <class DSType, bool reverso, class VertexT, typename F>
-        static void depthBreadthSearch(VertexT *head, const F &callback) {
+        template <class DSType, bool reverso, class VertexPtrT, typename EF, typename F>
+        static void depthBreadthSearch(VertexPtrT head, const EF& children, const F &callback) {
             DSType dstruc;
             const int hereCountStart = head->vertexSpecificData.wasHereCount;
 
             dstruc.push(head);
             head->vertexSpecificData.wasHereCount = hereCountStart + 1;
             while (!dstruc.empty()) {
-                VertexT *processed = get_top(dstruc);
+                auto processed = get_top(dstruc);
                 dstruc.pop();
 
                 callback(processed);
 
-                const size_t N = processed->children().size();
+                auto childs = children(processed);
+                const size_t N = childs.size();
                 for (int i = (reverso ? N-1 : 0) ; i != (reverso ? -1 : N) ; i += (reverso ? -1 : 1)) {
-                    VertexT *neigh = (VertexT *) (processed->children()[i]);
+                    auto neigh = childs[i];
                     if (neigh->vertexSpecificData.wasHereCount == hereCountStart) {
                         dstruc.push(neigh);
                         neigh->vertexSpecificData.wasHereCount = hereCountStart + 1;
-                    }
-                }
-            }
-        }
-
-    public:
-        /**
-          * @brief constant used for type-construction. Means DFS operation.
-          */
-        static const int depthFirstSearchOp = searchOp | 0x1;
-        /**
-          * @brief constant used for type-construction. Means BFS operation.
-          */
-        static const int breadthFirstSearchOp = searchOp | 0x2;
-
-        /**
-         * @brief DFS implementation.
-         * @tparam VertexT vertex type in graph.
-         * @tparam F callback type.
-         * @param head "seed" vertex of search.
-         * @param callback callback called with vertex when it's being marked as visited.
-         */
-        template <class VertexT, typename F>
-        static void depthFirstSearch(VertexT* head, const F& callback) {
-            depthBreadthSearch<std::stack<VertexT *>, true, VertexT, F>(head, callback);
-        }
-
-        /**
-         * @brief BFS implementation.
-         * @tparam VertexT vertex type in graph.
-         * @tparam F callback type.
-         * @param head "seed" vertex of search.
-         * @param callback callback called with vertex when it's being marked as visited.
-         */
-        template <class VertexT, typename F>
-        static void breadthFirstSearch(VertexT *head, const F &callback) {
-            depthBreadthSearch<std::queue<VertexT *>, false, VertexT, F>(head, callback);
-        }
-
-        /**
-         * @brief Dijkstra implementation.
-         * @tparam VertexT vertex type in graph.
-         * @tparam GetD getting the vertex dist callback type.
-         * @tparam SetD setting the vertex dist callback type.
-         * @tparam GetL getting the edge weight callback type.
-         * @param head "seed" vertex of search.
-         * @param setd getting the vertex dist callback.
-         * @param getd setting the vertex dist callback.
-         * @param getl getting the edge weight.
-         */
-        template <class VertexT, typename GetD, typename SetD, typename GetL>
-        static void Dijkstra(VertexT* head, const GetD& getd, const SetD& setd, const GetL& getl) {
-            breadthFirstSearch(head, [&](VertexT* v) {
-                setd(v, INT32_MAX);
-            });
-            setd(head, 0);
-
-            auto compare = [&](const VertexT* a, const VertexT* b) {
-                return getd(a) > getd(b);
-            };
-            std::priority_queue<VertexT*, std::vector<VertexT*>, decltype(compare)>  vertexesPQueue(compare);
-            vertexesPQueue.push(head);
-
-            while (!vertexesPQueue.empty()) {
-                VertexT *vertex = vertexesPQueue.top();
-                vertexesPQueue.pop();
-
-                for (auto neigh_ : vertex->children()) {
-                    VertexT* neigh = (VertexT*) neigh_;
-                    auto length = getl(vertex, neigh);
-
-                    //  If there is shorted path to v through u.
-                    if (getd(neigh) > getd(vertex) + length) {
-                        // Updating the distance of v
-                        setd(neigh, getd(vertex) + length);
-                        vertexesPQueue.push(neigh);
                     }
                 }
             }
