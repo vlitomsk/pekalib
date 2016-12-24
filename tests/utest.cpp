@@ -68,3 +68,48 @@ TEST(Search, breadthFirstSearch) {
     ASSERT_EQ(child00.data, magic[3]);
 }
 
+struct TestDijkstraVertex {
+    std::vector<TestDijkstraVertex*>& children() { //used by library
+        return children_;
+    }
+
+    TestDijkstraVertex() {}
+    explicit TestDijkstraVertex(int d) : data(d) {}
+
+    int data = 0;
+    int computedData = 0;
+
+    std::vector<TestDijkstraVertex*> children_;
+};
+
+TEST(Search, Dijkstra) {
+    using ActualVertex = typename pekalib::CreateVertexType<TestDijkstraVertex, pekalib::Search::depthFirstSearchOp, pekalib::GraphType::adjacency_list>::ActualVertexT;
+    ActualVertex head;
+    ActualVertex child0;
+    ActualVertex child00;
+    ActualVertex child1;
+
+    head.children() = { &child0, &child1 };
+    child0.children() = { &child00 };
+    child00.children() = { &head };
+
+    head.data = 323;
+    child0.data = 954;
+    child00.data = 4323;
+    child1.data = 32;
+
+    int i = 0;
+    pekalib::Search::Dijkstra(&head, [&](const ActualVertex* v) {
+        return v->computedData;
+    }, [&](ActualVertex* v, int cData) {
+        v->computedData = cData;
+    }, [&](const ActualVertex* v1, const ActualVertex* v2) {
+        return std::abs(v1->data - v2->data);
+    });
+
+    ASSERT_EQ(0, head.computedData);
+    ASSERT_EQ(631, child0.computedData);
+    ASSERT_EQ(4000, child00.computedData);
+    ASSERT_EQ(291, child1.computedData);
+}
+
